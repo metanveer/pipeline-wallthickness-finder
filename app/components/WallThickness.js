@@ -11,6 +11,7 @@ const WallThickness = () => {
   const [selectedNps, setSelectedNps] = useState(""); // Selected NPS value
   const [selectedHeader, setSelectedHeader] = useState(""); // Selected Header value
   const [displayValue, setDisplayValue] = useState(""); // Value to display
+  const [displayOD, setDisplayOD] = useState(""); // OD to display
 
   // Extract NPS options on mount
   useEffect(() => {
@@ -55,6 +56,7 @@ const WallThickness = () => {
         (row) => row.NPS === selectedNps
       );
       setDisplayValue(matchedRow ? matchedRow[selectedHeader] || "N/A" : "N/A");
+      setDisplayOD(matchedRow ? matchedRow["OD"] || "N/A" : "N/A");
     }
   }, [selectedNps, selectedHeader]);
 
@@ -109,14 +111,18 @@ const WallThickness = () => {
 
       {/* Display Section */}
       <div className={styles.displaySection}>
-        <h3>Wall Thickness:</h3>
-        <p className={styles.displayValue}>
-          {displayValue === "-"
-            ? "Not available"
-            : displayValue === ""
-            ? "Select options to view value"
-            : `${displayValue} mm`}
-        </p>
+        {displayValue !== "" && (
+          <>
+            <h3>OD:</h3>
+            <p className={styles.displayValue}>{`${displayOD} mm`}</p>
+          </>
+        )}
+        {displayValue !== "" && (
+          <>
+            <h3>Wall Thickness:</h3>
+            <p className={styles.displayValue}>{`${displayValue} mm`}</p>
+          </>
+        )}
       </div>
     </div>
   );
