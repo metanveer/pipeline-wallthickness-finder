@@ -12,18 +12,41 @@ const WallThickness = () => {
   const [selectedHeader, setSelectedHeader] = useState(""); // Selected Header value
   const [displayValue, setDisplayValue] = useState(""); // Value to display
 
-  // Extract NPS and Header options on mount
+  // Extract NPS options on mount
   useEffect(() => {
     if (wallThicknessData.length > 0) {
-      const headers = Object.keys(wallThicknessData[0]); // Extract headers
       const nps = wallThicknessData.map((row) => row["NPS"]); // Extract NPS values
-
       setNpsOptions([...new Set(nps)]); // Unique NPS values
-      setHeaderOptions(
-        headers.filter((header) => header !== "NPS" && header !== "OD")
-      ); // Exclude 'NPS' from headers
     }
   }, []);
+
+  // Update header options dynamically based on selected NPS
+  useEffect(() => {
+    if (selectedNps) {
+      const matchedRow = wallThicknessData.find(
+        (row) => row.NPS === selectedNps
+      );
+
+      if (matchedRow) {
+        const validHeaders = Object.keys(matchedRow).filter(
+          (key) =>
+            key !== "NPS" && // Exclude NPS
+            key !== "OD" && // Exclude OD
+            matchedRow[key] !== null && // Exclude null values
+            matchedRow[key] !== "-" && // Exclude empty values
+            !isNaN(matchedRow[key]) // Include only numeric values
+        );
+
+        setHeaderOptions(validHeaders);
+      } else {
+        setHeaderOptions([]);
+      }
+    } else {
+      setHeaderOptions([]); // Reset headers if no NPS is selected
+      setSelectedHeader(""); // Clear selected header
+      setDisplayValue(""); // Clear displayed value
+    }
+  }, [selectedNps]);
 
   // Update display value when selection changes
   useEffect(() => {
@@ -46,7 +69,11 @@ const WallThickness = () => {
           <select
             className={styles.select}
             value={selectedNps}
-            onChange={(e) => setSelectedNps(e.target.value)}
+            onChange={(e) => {
+              setSelectedNps(e.target.value);
+              setSelectedHeader(""); // Reset selected header
+              setDisplayValue(""); // Clear display value
+            }}
           >
             <option value="" disabled>
               Choose NPS
@@ -66,6 +93,7 @@ const WallThickness = () => {
             className={styles.select}
             value={selectedHeader}
             onChange={(e) => setSelectedHeader(e.target.value)}
+            disabled={!selectedNps || headerOptions.length === 0} // Disable until NPS is selected
           >
             <option value="" disabled>
               Choose Schedule
